@@ -267,3 +267,15 @@ def datetime_to_unix_ts(dt:datetime=None,is_second=True)->int:
     if is_second:
         return int(now.timestamp())
     return int(now.timestamp()*1000)
+
+def get_current_time_str(fmt:str=None):
+    """get current time
+
+    Args:
+        fmt (str, optional): format. Defaults to None.
+
+    Returns:
+        _type_: str
+    """
+    fmt = fmt or "%Y-%m-%d %H:%M:%S"
+    return datetime.datetime.now().strftime(fmt)
