@@ -1,7 +1,8 @@
-from functools import wraps
+from functools import wraps,lru_cache,partial
 import time
 from random import random
-def retry(func,count:int=3,retry_except:tuple=(Exception,),retry_interval:float=3,random_interval:bool=True,log=None):
+
+def retry(count:int=3,retry_except:tuple=(Exception,),retry_interval:float=3,random_interval:bool=True,log=None):
     """retry decorator support retry on condition of specific exceptions
 
     Args:
@@ -19,19 +20,22 @@ def retry(func,count:int=3,retry_except:tuple=(Exception,),retry_interval:float=
         log=lambda _:_
         log.info=print
         log.error=print
-    @wraps(func)
-    def _wrapper(*args, **kwargs):
-        for i in range(count):
-            try:
-                result = func(*args, **kwargs)
-                return result
-            except retry_except as e:
-                log.error(
-                    "retrying...func_name:{0},count:{1},msg:{2}".format(func.__name__, i + 1,str(e)))
-                if random_interval:
-                    time.sleep(random()*retry_interval)
-                    continue
-                time.sleep(retry_interval)
-        log.info("try {0} times still failed, func:{1},default return None".format(count, func.__name__))
-        return 
-    return _wrapper
+    def _wrap(func):
+        @wraps(func)
+        def _wrapper(*args, **kwargs):
+            for i in range(count):
+                try:
+                    result = func(*args, **kwargs)
+                    return result
+                except retry_except as e:
+                    log.error(
+                        "retrying...func_name:{0},count:{1},msg:{2}".format(func.__name__, i + 1,str(e)))
+                    if random_interval:
+                        time.sleep(random()*retry_interval)
+                        continue
+                    time.sleep(retry_interval)
+            log.info("try {0} times still failed, func:{1},default return None".format(count, func.__name__))
+            return 
+        return _wrapper
+    return _wrap
+
