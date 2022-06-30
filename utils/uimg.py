@@ -1,12 +1,13 @@
 import math
 from PIL import Image, ImageDraw, ImageFont,ImageEnhance, ImageChops
 import textwrap
+from typing import Tuple
 
-def random_text_color():
+def random_text_color()->Tuple[float,float,float,float]:
     import random
     return (random.choice(range(0,250)),random.choice(range(0,250)),random.choice(range(0,250)),random.choice(range(0,250)))
 
-def random_ttf(folder):
+def random_ttf(folder:str)->str:
     import os,random
     ttf_files=[]
     for root, dirs, files in os.walk(folder, topdown=True):
@@ -16,7 +17,7 @@ def random_ttf(folder):
                 ttf_files.append(ttf_file)
     return random.choice(ttf_files)
 
-def text2image(text:str,font_path:str,text_color:tuple,img_size:tuple=(800,300))->Image:
+def text2image(text:str,font_path:str,text_color:Tuple[float,float,float,float],img_size:Tuple[float,float]=(800,300))->Image:
 
     para = textwrap.wrap(text, width=30)
 
@@ -32,7 +33,7 @@ def text2image(text:str,font_path:str,text_color:tuple,img_size:tuple=(800,300))
         current_h += h + pad
     return im
 
-def set_opacity(im, opacity):
+def set_opacity(im:Image, opacity:float)->Image:
     '''
     设置水印透明度
     '''
@@ -43,7 +44,7 @@ def set_opacity(im, opacity):
     im.putalpha(alpha)
     return im
 
-def crop_image(im):
+def crop_image(im:Image)->Image:
     '''裁剪图片边缘空白'''
     bg = Image.new(mode='RGBA', size=im.size)
     diff = ImageChops.difference(im, bg)
@@ -52,10 +53,23 @@ def crop_image(im):
     if bbox:
         return im.crop(bbox)
     return im
-def add_water_mark(im,text,mark_font,color="#8B8B1B",space=75,angle=30,_size=20,opacity=0.15,quality=100):
-    '''
-    生成mark图片，返回添加水印的函数
-    '''
+def add_water_mark(im:Image,text:str,mark_font:str,color="#8B8B1B",space=75,angle=30,_size=20,opacity=0.15,quality=100)->Image:
+    """_summary_
+
+    Args:
+        im (Image): Image object
+        text (str): mark text
+        mark_font (str): font path
+        color (str, optional): text color like '#000000'. Defaults to "#8B8B1B".
+        space (int, optional): space between watermarks. Defaults to 75.
+        angle (int, optional): rotate angle of watermarks. Defaults to 30.
+        _size (int, optional): font size of text. Defaults to 20.
+        opacity (float, optional): opacity of watermarks. Defaults to 0.15.
+        quality (int, optional): quality of output images. Defaults to 100.
+
+    Returns:
+        Image: Image object
+    """
     # 字体宽度
     width = len(text) * _size
 
